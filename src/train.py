@@ -19,7 +19,7 @@ from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
 
 sys.path.append("./src")
-from dataset import MultiomeBrainDataModule_Pre, DynDataModule_Smooth
+from dataset import MultiomeBrainDataModule_Pre, DynDataModule_Smooth, CustomDataModule_Pre
 from utils import fit_beta_gamma, plot_umap, plot_genewise_corr, plot_peakwise_corr, plot_size_factor, plot_vec_embed, fit_beta_gamma, get_filter_idx_raw, plot_su_expr_umap, plot_su_phase_raw, plot_genewise_vel_cossim, plot_su_phase_dsdt_var, plot_fluctuation_umap, fit_beta_gamma_scale, compute_cossim_genewise_contribution, plot_vec_embed_tanh, plot_genewise_vel_cossim_scale, plot_filtered_vec_embed
 from models import DREG_PRE, DREG_DYN, EarlyStoppingWithWarmup
 
@@ -80,12 +80,10 @@ with open(runPath + "/params.json", mode="w") as f:
     json.dump(args.__dict__, f, indent=4)
 
 print("loading DataModule...")
-if args.custom_data is False:
-    dm = MultiomeBrainDataModule_Pre(batch_size=args.batch_size, n_top_genes=args.n_genes, n_top_peaks=args.n_peaks, min_counts_genes=args.min_counts_genes, min_counts_peaks=args.min_counts_peaks,
-                                 wo_in=True)
+if args.custom_data:
+    dm = CustomDataModule_Pre(batch_size=args.batch_size, n_top_genes=args.n_genes, n_top_peaks=args.n_peaks, min_counts_genes=args.min_counts_genes, min_counts_peaks=args.min_counts_peaks)
 else:
-    dm = MultiomeBrainDataModule_Pre(batch_size=args.batch_size, n_top_genes=args.n_genes, n_top_peaks=args.n_peaks, min_counts_genes=args.min_counts_genes, min_counts_peaks=args.min_counts_peaks,
-                                 wo_in=True)
+    dm = MultiomeBrainDataModule_Pre(batch_size=args.batch_size, n_top_genes=args.n_genes, n_top_peaks=args.n_peaks, min_counts_genes=args.min_counts_genes, min_counts_peaks=args.min_counts_peaks,)
 
 print("loading Models...")
 model = DREG_PRE(dm.rna_dim, dm.atac_dim, args.r_h1dim, args.r_h2dim, args.a_h1dim, args.a_h2dim,
