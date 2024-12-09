@@ -302,7 +302,7 @@ class DREG_PRE(pl.LightningModule):
 
 class DREG_DYN(pl.LightningModule):
     def __init__(self, rna_dim, atac_dim, r_h1_dim, r_h2_dim, a_h1_dim, a_h2_dim,
-                 z_dim, d_h_dim, l_prior_r, l_prior_a, lr, z_learnable=True, d_coeff=1e-2, 
+                 z_dim, d_h_dim, l_prior_r=None, l_prior_a=None, lr=1e-4, z_learnable=True, d_coeff=1e-2, 
                  warmup=50, filter_idx=None):
         super().__init__()
         self.rna_dim, self.atac_dim, self.z_dim = rna_dim, atac_dim, z_dim

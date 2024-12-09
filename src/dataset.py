@@ -20,7 +20,7 @@ def get_l_prior_r(adata_r):
     total_count = np.sum(adata_r.layers["spliced"] + adata_r.layers["unspliced"], axis=1)
     mean = np.mean(np.log(total_count))
     std = np.std(np.log(total_count))
-    print("log-mean, log-std; ",mean, std)
+    print("RNA library size log-mean, log-std; ", mean, std)
     return torch.distributions.log_normal.LogNormal(mean, std)
 
 def get_norm_mat_r(adata_r, moment=False):
@@ -46,7 +46,7 @@ def get_l_prior_a(adata_a):
     total_count = np.sum(adata_a.X, axis=1)
     mean = np.mean(np.log(total_count))
     std = np.std(np.log(total_count))
-    print("log-mean, log-std; ",mean, std)
+    print("ATAC library size log-mean, log-std; ", mean, std)
     return torch.distributions.log_normal.LogNormal(mean, std)
 
 class VAEDataSet(torch.utils.data.Dataset):
@@ -147,46 +147,58 @@ class DynDataModule_Smooth(pl.LightningDataModule):
 class MultiomeBrainDataModule_Pre(pl.LightningDataModule):
     def __init__(self, batch_size : int =128, num_workers=2, 
                  min_counts_genes=10, min_counts_peaks=10,
-                 n_top_genes=3000, n_top_peaks=20000, sub = False, wo_in=True):
+                 n_top_genes=3000, n_top_peaks=20000, sub = False):
         super().__init__()
         self.save_hyperparameters()
         print("Loading data...")
-        if wo_in:
-            self.adata_r = sc.read_loom("/home/nomura/Proj/mmvelo/data/10x_multiome_brain_repre_wo_IN/adata_rna.loom")
-            self.adata_a = sc.read_loom("/home/nomura/Proj/mmvelo/data/10x_multiome_brain_repre_wo_IN/adata_atac.loom")
-            self.adata_r.obs_names = self.adata_r.obs.obs_names
-            self.adata_r.var_names = self.adata_r.var.var_names
-            self.adata_a.obs_names = self.adata_a.obs.obs_names
-            self.adata_a.var_names = self.adata_a.var.var_names
+        self.adata_r = sc.read_loom("./data/adata_rna.loom")
+        self.adata_a = sc.read_loom("./data/adata_atac.loom")
+        self.adata_r.obs_names = self.adata_r.obs.obs_names
+        self.adata_r.var_names = self.adata_r.var.var_names
+        self.adata_a.obs_names = self.adata_a.obs.obs_names
+        self.adata_a.var_names = self.adata_a.var.var_names
+        self.rna_dim, self.atac_dim = self.adata_r.shape[1], self.adata_a.shape[1]
+        print("RNA dim : {}".format(self.rna_dim), "ATAC dim : {}".format(self.atac_dim))
+        print("# cells :{}".format(self.adata_r.shape[0]))
+        self.idx = split_data(self.adata_r)
+        self.l_prior_r, self.l_prior_a  = get_l_prior_r(self.adata_r), get_l_prior_a(self.adata_a)
+        self.norm_mat_r = get_norm_mat_r(self.adata_r)
+        self.norm_mat_a = get_norm_mat_a(self.adata_a)
+        self.retain_genes_idx = None
 
-        else:
-            self.adata_r = sc.read_loom("/home/nomura/Proj/mmvelo/data/10x_multiome_brain_repre/adata_rna.loom")
-            self.adata_a = sc.read_loom("/home/nomura/Proj/mmvelo/data/10x_multiome_brain_repre/adata_atac.loom")
-            cell_idx = pd.read_csv("/home/nomura/Proj/mmvelo/data/10x_multiome_brain_repre/retain_cells.tsv", sep="\t", header=None)[0]
-            self.adata_r.obs_names = self.adata_r.obs.obs_names
-            self.adata_r.var_names = self.adata_r.var.var_names
-            self.adata_a.obs_names = self.adata_a.obs.obs_names
-            self.adata_a.var_names = self.adata_a.var.var_names
-            self.adata_r, self.adata_a = self.adata_r[cell_idx, :], self.adata_a[cell_idx, :]
-            scv.pp.filter_genes(self.adata_r, min_counts=min_counts_genes, min_counts_u=min_counts_genes)
-            sc.pp.filter_genes(self.adata_a, min_counts=min_counts_peaks)
-            # RNA var preprocessing
-            ##scv.pp.filter_genes_dispersion(self.adata_r, n_top_genes=n_top_genes)
-            # ATAC var preprocessing
-            # as described in https://github.com/scverse/muon-tutorials/blob/master/single-cell-rna-atac/pbmc10k/2-Chromatin-Accessibility-Processing.ipynb
-            ##self.adata_a.layers["counts"] = self.adata_a.X
-            ##sc.pp.normalize_per_cell(self.adata_a)
-            ##sc.pp.log1p(self.adata_a)
-            ##sc.pp.highly_variable_genes(self.adata_a, min_mean=0.05, max_mean=1.5, min_disp=.5, n_top_genes=n_top_peaks)
-            ##self.adata_a = self.adata_a[:, self.adata_a.var["highly_variable"]]
-            ##self.adata_a.X = self.adata_a.layers["counts"]
+        self.adata_r.obs["clusters"] = pd.read_json("./data/cell_clusters.json", typ="series").astype("category")
 
-        """
-        # FindTopFeatures
-        top_peaks_idx = np.argsort(-self.adata_a.X.toarray().sum(axis=0))[:n_top_peaks]
-        self.adata_a = self.adata_a[:, top_peaks_idx]
-        """
 
+    def train_dataloader(self):
+        train_set = VAEDataSet(self.adata_r[self.idx["train"], :], self.adata_a[self.idx["train"], :])
+        return torch.utils.data.DataLoader(train_set, batch_size = self.hparams.batch_size, num_workers=self.hparams.num_workers, shuffle=True, drop_last=True, pin_memory=True)
+
+    def val_dataloader(self):
+        val_set = VAEDataSet(self.adata_r[self.idx["val"], :], self.adata_a[self.idx["val"], :])
+        return torch.utils.data.DataLoader(val_set, batch_size = self.hparams.batch_size, num_workers=self.hparams.num_workers, shuffle=False, pin_memory=True)
+
+    def test_dataloader(self):
+        test_set = VAEDataSet(self.adata_r[self.idx["test"], :], self.adata_a[self.idx["test"], :])
+        return torch.utils.data.DataLoader(test_set, batch_size = self.hparams.batch_size, num_workers=self.hparams.num_workers, shuffle=False, pin_memory=True)
+
+    def all_dataloader(self):
+        all_set = VAEDataSet(self.adata_r, self.adata_a)
+        return torch.utils.data.DataLoader(all_set, batch_size = self.hparams.batch_size, num_workers=self.hparams.num_workers, shuffle=False, pin_memory=True)
+    
+class CustomDataModule_Pre(pl.LightningDataModule):
+    def __init__(self, rna_dir, atac_dir,
+                 batch_size : int =128, num_workers=2, 
+                 min_counts_genes=10, min_counts_peaks=10,
+                 n_top_genes=3000, n_top_peaks=20000, sub = False):
+        super().__init__()
+        self.save_hyperparameters()
+        print("Loading data...")
+        self.adata_r = sc.read_loom("./data/adata_rna.loom")
+        self.adata_a = sc.read_loom("./data/adata_atac.loom")
+        self.adata_r.obs_names = self.adata_r.obs.obs_names
+        self.adata_r.var_names = self.adata_r.var.var_names
+        self.adata_a.obs_names = self.adata_a.obs.obs_names
+        self.adata_a.var_names = self.adata_a.var.var_names
         self.rna_dim, self.atac_dim = self.adata_r.shape[1], self.adata_a.shape[1]
         print("RNA dim : {}".format(self.rna_dim), "ATAC dim : {}".format(self.atac_dim))
         print("# cells :{}".format(self.adata_r.shape[0]))
