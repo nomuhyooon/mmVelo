@@ -16,10 +16,9 @@ import seaborn as sns
 import scipy
 from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.special import softmax
 
-sys.path.append("/home/nomura/Proj/mmvelo/src")
-from mmvelo_multi.streamlineplot import velocity_graph
+sys.path.append("./src")
+from streamlineplot import velocity_graph
 
 
 # for umap
