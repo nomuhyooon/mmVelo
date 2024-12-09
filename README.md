@@ -3,7 +3,7 @@ mmVelo is a deep generative model designed to estimate cell state-dependent dyna
 
 
 ## Usage
-A detailed tutorial on running mmVelo can be found [here](jupyter notebook).
+A detailed tutorial on running mmVelo can be found [here (tutorial.ipynb)](https://github.com/nomuhyooon/mmVelo/blob/master/tutorial.ipynb).
 
 To apply mmVelo to a custom dataset, follow these steps:
 1.  Prepare AnnData for each modality:
