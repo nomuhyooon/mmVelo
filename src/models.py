@@ -9,9 +9,9 @@ from torch.nn import init
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
-sys.path.append("/home/nomura/Proj/mmvelo/src")
-from mmvelo_multi.modules import VAE_RNA, VAE_ATAC
-from mmvelo_multi.funcs import kl_divergence, convert_mean_disp_to_counts_logits, ZINB_logits
+sys.path.append("./src")
+from modules import VAE_RNA, VAE_ATAC
+from funcs import kl_divergence, convert_mean_disp_to_counts_logits, ZINB_logits
 
 
 class DREG_PRE(pl.LightningModule):
