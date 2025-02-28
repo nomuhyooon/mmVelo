@@ -53,16 +53,16 @@ class VAEDataSet(torch.utils.data.Dataset):
     def __init__(self, adata_r, adata_a, moment=False):
         self.moment = moment
         if self.moment:
-            self.s = adata_r.layers["spliced_count"].toarray()
-            self.u = adata_r.layers["unspliced_count"].toarray()
-            self.a = adata_a.layers["atac_count"].toarray()
-            self.ms = adata_r.layers["Ms"]
-            self.mu = adata_r.layers["Mu"]
-            self.ma = adata_a.layers["Ma"]
+            self.s = adata_r.layers["spliced_count"].toarray().astype(np.float32)
+            self.u = adata_r.layers["unspliced_count"].toarray().astype(np.float32)
+            self.a = adata_a.layers["atac_count"].toarray().astype(np.float32)
+            self.ms = adata_r.layers["Ms"].astype(np.float32)
+            self.mu = adata_r.layers["Mu"].astype(np.float32)
+            self.ma = adata_a.layers["Ma"].astype(np.float32)
         else:
-            self.s = adata_r.layers["spliced"].toarray()
-            self.u = adata_r.layers["unspliced"].toarray()
-            self.a = adata_a.X.toarray()
+            self.s = adata_r.layers["spliced"].toarray().astype(np.float32)
+            self.u = adata_r.layers["unspliced"].toarray().astype(np.float32)
+            self.a = adata_a.X.toarray().astype(np.float32)
         self.shape = self.s.shape
         self.obs_names = adata_r.obs_names
         self.gene_names = adata_r.var_names
@@ -72,13 +72,13 @@ class VAEDataSet(torch.utils.data.Dataset):
         return self.shape[0]
 
     def __getitem__(self, idx):
-        s = torch.tensor(self.s[idx,:])
-        u = torch.tensor(self.u[idx,:])
-        a = torch.tensor(self.a[idx,:])
+        s = torch.tensor(self.s[idx,:], dtype=torch.float32)
+        u = torch.tensor(self.u[idx,:], dtype=torch.float32)
+        a = torch.tensor(self.a[idx,:], dtype=torch.float32)
         if self.moment:
-            ms = torch.tensor(self.ms[idx,:])
-            mu = torch.tensor(self.mu[idx,:])
-            ma = torch.tensor(self.ma[idx,:])
+            ms = torch.tensor(self.ms[idx,:], dtype=torch.float32)
+            mu = torch.tensor(self.mu[idx,:], dtype=torch.float32)
+            ma = torch.tensor(self.ma[idx,:], dtype=torch.float32)
             return s, u, a, ms, mu, ma
         return s, u, a
         
