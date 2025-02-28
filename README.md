@@ -1,7 +1,7 @@
 # mmVelo
 mmVelo is a deep generative model designed to estimate cell state-dependent dynamics across multiple modalities. By utilizing splicing kinetics and multimodal representation learning, mmVelo infers cell state dynamics on joint representations and estimates temporal changes in specific modalities by mapping these dynamics.
 
-![concept](concept.jpg)
+![concept][def]
 
 ## Usage
 A detailed tutorial on running mmVelo can be found [here (tutorial.ipynb)](https://github.com/nomuhyooon/mmVelo/blob/master/tutorial.ipynb).
@@ -21,3 +21,5 @@ To apply mmVelo to a custom dataset, follow these steps:
 
 
 For more information on the methods, refer to our preprint.
+
+[def]: concept.jpg
