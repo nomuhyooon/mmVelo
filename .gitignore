@@ -13,6 +13,5 @@
 *.pth
 *.ckpt
 *.pkl
-*.loom
 __pycache__/
 .ipynb_checkpoints/
