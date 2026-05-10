@@ -3,7 +3,7 @@
 /mmVelo_tutorial/src/__pycache__
 /mmVelo_tutorial_v2/experiments/
 /mmVelo_tutorial_v2/runs/
-/mmVelo_tutorial_v2/data/
+/mmVelo_tutorial_v2/data/human_brain/
 
 *.h5ad
 *.h5

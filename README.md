@@ -13,11 +13,9 @@ For a full description of the method, please refer to our preprint:
 
 The main tutorial is available here:
 
-- [mmVelo_tutorial_v1](./mmVelo_tutorial_v2/)
+- [mmVelo_tutorial_v2](./mmVelo_tutorial_v2/)
 
-The previous version is kept for reference:
-
-- [mmVelo_tutorial_v0](./mmVelo_tutorial/)
+The previous version is kept for reference ([mmVelo_tutorial](./mmVelo_tutorial/)).
 
 ### Tutorial 1: Embryonic Mouse Brain (`tutorial_1_mouse_brain.ipynb`)
 
