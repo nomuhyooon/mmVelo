@@ -276,6 +276,10 @@ mmVelo_tutorial_v2/
 ├── README.md
 ├── pyproject.toml
 ├── setup.cfg
+├── src/
+│   ├──fig_E18_mose_brain        # code to reproduce the figures in the paper
+│   ├──fig_human_brain           # code to reproduce the figures in the paper
+│   ├──fig_mouse_hair_follicle   # code to reproduce the figures in the paper
 ├── data/
 │   ├── mouse_brain/             # Tutorial 1 data
 │   │   ├── adata_rna.loom
