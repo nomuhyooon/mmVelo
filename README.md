@@ -314,5 +314,6 @@ See `setup.cfg` for the full list of dependencies.
 - **Mouse brain (Tutorial 1)**: [10x Genomics fresh embryonic E18 mouse brain (5k cells)](https://www.10xgenomics.com/datasets/fresh-embryonic-e-18-mouse-brain-5-k-1-standard-2-0-0). Preprocessing details are described in the Methods section of the mmVelo paper.
 - **Human cortical development (Tutorial 2)**: Trevino AE, et al. *Chromatin and gene-regulatory dynamics of the developing human cerebral cortex at single-cell resolution.* Cell 2021;184(19):5053–5069.e23. (GEO: GSE162170).
 
+[![DOI](https://zenodo.org/badge/899925593.svg)](https://doi.org/10.5281/zenodo.20103609)
 
 [def]: concept.jpg
