@@ -77,7 +77,7 @@ An `AnnData` object where rows are cells and columns are genes.
 - `"rna"` — cells profiled with scRNA-seq only (ATAC missing)
 - `"atac"` — cells profiled with scATAC-seq only (RNA missing)
 
-At least some `"multiome"` cells are required for Stage 1a pretraining.
+At least some `"multiome"` cells are required for Stage 1a pretraining; performance generally improves with a higher proportion of multiome cells.
 
 #### Note on `Condtioning_ID`
 
@@ -262,7 +262,7 @@ adata_atac.write_h5ad("data/my_dataset/joint_atac_adata.h5ad")
   - `"atac"`
   - `"multiome"`
 
-- [ ] At least some `"multiome"` cells exist (required for Stage 1a pretraining)
+- [ ] At least some `"multiome"` cells exist (required for Stage 1a pretraining); performance generally improves with a higher proportion of multiome cells
 
 - [ ] `cluster_annotation_refined.txt`, `cells_included.txt`, and `dpt_pseudotime.tsv` are prepared for visualization (Sections 6, 10, and 11)
 
